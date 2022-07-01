@@ -7,9 +7,14 @@ class GameOfLife {
 
   makeBoard() {
     // Generate multi-dimensional array:
-    return new Array(this.height)
-      .fill()
-      .map(() => new Array(this.width).fill(0));
+    let board = []
+    for(let i = 0; i < this.height; i++) {
+      board.push([])     
+      for(let j = 0; j < this.width; j++) {
+        board[i].push(0)
+      }        
+    }
+    return board
   }
 
   cellExists(row, col) {
@@ -27,18 +32,6 @@ class GameOfLife {
   setCell(value, row, col) {
     if (this.cellExists(row, col)) {
       this.board[row][col] = value;
-    }
-  }
-
-  toggleCell(row, col) {
-    this.setCell(1 - this.getCell(row, col), row, col);
-  }
-
-  forEachCell(iterator) {
-    for (let row = 0; row < this.height; row++) {
-      for (let col = 0; col < this.width; col++) {
-        iterator(row, col);
-      }
     }
   }
 
@@ -76,12 +69,29 @@ class GameOfLife {
   tick() {
     const newBoard = this.makeBoard();
 
-    this.forEachCell((row, col) => {
-      const livingNeighbors = this.livingNeighbors(row, col);
-      const nextCell = this.conwayRule(this.getCell(row, col), livingNeighbors);
-      newBoard[row][col] = nextCell;
-    });
+    // this.forEachCell((row, col) => {
+    //   const livingNeighbors = this.livingNeighbors(row, col);
+    //   const nextCell = this.conwayRule(this.getCell(row, col), livingNeighbors);
+    //   newBoard[row][col] = nextCell;
+    // });
+
+    for(let i = 0; i < this.height; i++){
+      for(let j = 0; j < this.width; j++) {
+        const livingNeighbors = this.livingNeighbors(i, j);
+        const nextCell = this.conwayRule(this.getCell(i, j), livingNeighbors);
+        newBoard[i][j] = nextCell;
+      }
+    }
 
     this.board = newBoard;
   }
 }
+
+
+// const gol = new GameOfLife(5, 5)
+// gol.setCell(1, 1, 2)
+// gol.setCell(1, 2, 2)
+// gol.setCell(1, 3, 2)
+// console.log(gol.board)
+// gol.tick()
+// console.log(gol.board)

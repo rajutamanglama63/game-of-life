@@ -4,9 +4,6 @@ const height = 20;
 // Create Game of Life instance
 const gol = new GameOfLife(width, height);
 
-// Actual table cells
-const cells = [];
-
 // Create Table
 const table = document.createElement("tbody");
 for (let h = 0; h < height; h++) {
@@ -15,7 +12,6 @@ for (let h = 0; h < height; h++) {
     const td = document.createElement("td");
     td.dataset.row = h;
     td.dataset.col = w;
-    cells.push(td);
     tr.append(td);
   }
   table.append(tr);
@@ -23,19 +19,23 @@ for (let h = 0; h < height; h++) {
 document.getElementById("board").append(table);
 
 const paint = () => {
-  cells.forEach((td) => {
-    const cellValue = gol.getCell(td.dataset.row, td.dataset.col);
-    if (cellValue === 1) {
-      td.classList.add("alive");
-    } else {
-      td.classList.remove("alive");
+  for (let i = 0; i < gol.height; i++) {
+    for (let j = 0; j < gol.width; j++) {
+      let currentRow = document.querySelectorAll(`[data-row = '${i}']`);
+      if (gol.board[i][j] === 1) {
+        currentRow[j].classList.add("alive");
+      } else {
+        currentRow[j].classList.remove("alive");
+      }
     }
-  });
+  }
 };
 
 // Add event Listeners
 document.getElementById("board").addEventListener("click", (event) => {
-  gol.toggleCell(event.target.dataset.row, event.target.dataset.col);
+  const row = event.target.dataset.row;
+  const col = event.target.dataset.col;
+  gol.board[row][col] = 1;
   paint();
 });
 
@@ -44,29 +44,34 @@ document.getElementById("step_btn").addEventListener("click", () => {
   paint();
 });
 
-let interval = null;
+let clicked = false;
+let interval;
 document.getElementById("play_btn").addEventListener("click", () => {
-  if (!interval) {
+  if (!clicked) {
+    document.querySelector("#play_btn").innerHTML = "stop";
+    clicked = true;
+
     interval = setInterval(() => {
       gol.tick();
       paint();
     }, 100);
   } else {
+    clicked = false;
+    document.querySelector("#play_btn").innerHTML = "play";
     clearInterval(interval);
-    interval = null;
   }
 });
 
-document.getElementById("reset_btn").addEventListener("click", () => {
-  gol.forEachCell((row, col) => {
-    gol.setCell(Math.round(Math.random()), row, col);
-  });
+document.getElementById("random_btn").addEventListener("click", () => {
+  for (let i = 0; i < gol.board.length; i++) {
+    for (let j = 0; j < gol.board[i].length; j++) {
+      gol.setCell(Math.round(Math.random()), i, j);
+    }
+  }
   paint();
 });
 
 document.getElementById("clear_btn").addEventListener("click", () => {
-  gol.forEachCell((row, col) => {
-    gol.setCell(0, row, col);
-  });
+  gol.board = gol.makeBoard();
   paint();
 });
